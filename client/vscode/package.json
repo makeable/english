@@ -1,0 +1,163 @@
+{
+  "name": "english-structure-highlighter",
+  "displayName": "English Structure Highlighter",
+  "description": "Syntax highlighting for English prose: parts of speech, sentence roles, clauses, entities and style hints, powered by spaCy.",
+  "version": "0.1.0",
+  "publisher": "makeable",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": ["Programming Languages", "Linters", "Other"],
+  "activationEvents": [
+    "onLanguage:plaintext",
+    "onLanguage:markdown"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      { "command": "english.switchView", "title": "English: Switch Highlight View" },
+      { "command": "english.applyRecommendedColors", "title": "English: Apply Recommended Colours" },
+      { "command": "english.restartServer", "title": "English: Restart Language Server" }
+    ],
+    "configuration": {
+      "title": "English Structure Highlighter",
+      "properties": {
+        "english.pythonPath": {
+          "type": "string",
+          "default": "",
+          "description": "Python interpreter that has the english-ls server installed. Empty = use the repo's server/.venv if present, else python3."
+        },
+        "english.model": {
+          "type": "string",
+          "enum": ["en_core_web_trf", "en_core_web_lg", "en_core_web_md", "en_core_web_sm"],
+          "enumDescriptions": [
+            "Transformer model: most accurate, slowest, needs PyTorch",
+            "Large model: good accuracy, fast",
+            "Medium model",
+            "Small model: fastest, least accurate"
+          ],
+          "default": "en_core_web_trf",
+          "description": "spaCy model to use. Falls back to whichever English model is installed."
+        },
+        "english.view": {
+          "type": "string",
+          "enum": ["all", "pos", "roles", "entities"],
+          "enumDescriptions": [
+            "Parts of speech, with sentence-role underlines, clause tints and entity boxes",
+            "Parts of speech only",
+            "Sentence roles (subject, predicate, object...) with clause tints",
+            "Named entities"
+          ],
+          "default": "all",
+          "description": "What the colours show."
+        },
+        "english.styleChecks": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show style hints (passive voice, long sentences, filler words, repeated words)."
+        },
+        "english.longSentenceWords": {
+          "type": "number",
+          "default": 35,
+          "description": "Sentences with more words than this are flagged."
+        },
+        "english.decorations.clauses": {
+          "type": "boolean",
+          "default": true,
+          "description": "Tint subordinate clauses (darker = more deeply nested)."
+        },
+        "english.decorations.roleUnderlines": {
+          "type": "boolean",
+          "default": true,
+          "description": "In the 'all' view, underline subject / predicate / object in colour."
+        },
+        "english.decorations.entities": {
+          "type": "boolean",
+          "default": true,
+          "description": "Draw a box around named entities."
+        }
+      }
+    },
+    "semanticTokenTypes": [
+      { "id": "noun", "description": "Noun" },
+      { "id": "properNoun", "description": "Proper noun" },
+      { "id": "verb", "description": "Verb" },
+      { "id": "auxiliary", "description": "Auxiliary verb" },
+      { "id": "adjective", "description": "Adjective" },
+      { "id": "adverb", "description": "Adverb" },
+      { "id": "pronoun", "description": "Pronoun" },
+      { "id": "determiner", "description": "Determiner" },
+      { "id": "adposition", "description": "Preposition" },
+      { "id": "conjunction", "description": "Conjunction" },
+      { "id": "numeral", "description": "Number" },
+      { "id": "particle", "description": "Particle" },
+      { "id": "interjection", "description": "Interjection" },
+      { "id": "subject", "description": "Subject of a clause" },
+      { "id": "predicate", "description": "Main verb (with its auxiliaries)" },
+      { "id": "object", "description": "Object" },
+      { "id": "complement", "description": "Complement" },
+      { "id": "adjunct", "description": "Adverbial / prepositional modifier" },
+      { "id": "entityPerson", "description": "Person" },
+      { "id": "entityPlace", "description": "Place" },
+      { "id": "entityOrg", "description": "Organisation or group" },
+      { "id": "entityTime", "description": "Date or time" },
+      { "id": "entityQuantity", "description": "Number, amount or quantity" },
+      { "id": "entityOther", "description": "Other named entity" }
+    ],
+    "semanticTokenModifiers": [
+      { "id": "head", "description": "The head word of a sentence role" }
+    ],
+    "semanticTokenScopes": [
+      {
+        "scopes": {
+          "noun": ["variable.other"],
+          "properNoun": ["entity.name.type.class"],
+          "verb": ["entity.name.function"],
+          "auxiliary": ["storage.modifier"],
+          "adjective": ["string"],
+          "adverb": ["variable.parameter"],
+          "pronoun": ["variable.language"],
+          "determiner": ["keyword"],
+          "adposition": ["keyword.operator"],
+          "conjunction": ["keyword.control"],
+          "numeral": ["constant.numeric"],
+          "particle": ["keyword.other"],
+          "interjection": ["constant.language"],
+          "subject": ["entity.name.type.class"],
+          "predicate": ["entity.name.function"],
+          "object": ["string"],
+          "complement": ["constant.numeric"],
+          "adjunct": ["keyword.control"],
+          "entityPerson": ["entity.name.type.class"],
+          "entityPlace": ["string"],
+          "entityOrg": ["entity.name.function"],
+          "entityTime": ["constant.numeric"],
+          "entityQuantity": ["constant.language"],
+          "entityOther": ["keyword"]
+        }
+      }
+    ],
+    "configurationDefaults": {
+      "[markdown]": { "editor.semanticHighlighting.enabled": true },
+      "[plaintext]": { "editor.semanticHighlighting.enabled": true }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p .",
+    "watch": "tsc -watch -p .",
+    "test": "npm run compile && node ./out/test/runTest.js",
+    "package": "vsce package"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.6",
+    "@types/node": "^20.11.0",
+    "@types/vscode": "~1.90.0",
+    "@vscode/test-electron": "^2.4.1",
+    "mocha": "^10.4.0",
+    "typescript": "~5.6.3"
+  }
+}
